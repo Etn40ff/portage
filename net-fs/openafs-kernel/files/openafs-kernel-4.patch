@@ -1,0 +1,37 @@
+diff --git a/acinclude.m4 b/acinclude.m4
+index 6fc862d..e581d9b 100644 (file)
+--- a/acinclude.m4
++++ b/acinclude.m4
+@@ -455,7 +455,7 @@ case $system in
+                 case "$GUESS_LINUX_VERSION" in
+                   2.2.*) AFS_SYSKVERS=22 ;;
+                   2.4.*) AFS_SYSKVERS=24 ;;
+-                  2.6.* | 3.*) AFS_SYSKVERS=26 ;;
++                  [2.6.* | [3-9]* | [1-2][0-9]*]) AFS_SYSKVERS=26 ;;
+                   *) AC_MSG_ERROR(Couldn't guess your Linux version [2]) ;;
+                 esac
+                 ;;
+
+@@ -915,6 +915,7 @@ case $AFS_SYSNAME in *_linux* | *_umlinux*)
+                 AC_CHECK_LINUX_TYPE([kuid_t], [uidgid.h])
+ 
+                 dnl Check for structure elements
++                AC_CHECK_LINUX_STRUCT([address_space], [backing_dev_info], [fs.h])
+                 AC_CHECK_LINUX_STRUCT([address_space_operations],
+                                       [write_begin], [fs.h])
+                 AC_CHECK_LINUX_STRUCT([backing_dev_info], [name],
+
+diff --git a/src/afs/LINUX/osi_vnodeops.c b/src/afs/LINUX/osi_vnodeops.c
+index 513b962..5869eb9 100644 (file)
+--- a/src/afs/LINUX/osi_vnodeops.c
++++ b/src/afs/LINUX/osi_vnodeops.c
+@@ -3056,7 +3056,9 @@ afs_fill_inode(struct inode *ip, struct vattr *vattr)
+     if (vattr)
+        vattr2inode(ip, vattr);
+ 
++#ifdef STRUCT_ADDRESS_SPACE_HAS_BACKING_DEV_INFO
+     ip->i_mapping->backing_dev_info = afs_backing_dev_info;
++#endif
+ /* Reset ops if symlink or directory. */
+     if (S_ISREG(ip->i_mode)) {
+        ip->i_op = &afs_file_iops;
