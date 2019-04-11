@@ -1,0 +1,101 @@
+diff --git a/src/ipelib/ipebase.cpp b/src/ipelib/ipebase.cpp
+index 63de035..19226ad 100644
+--- a/src/ipelib/ipebase.cpp
++++ b/src/ipelib/ipebase.cpp
+@@ -557,55 +557,50 @@ Stream &Stream::operator<<(int i)
+ //! Output double.
+ Stream &Stream::operator<<(double d)
+ {
+-  char buf[30];
+-  if (d < 0.0) {
+-    putChar('-');
+-    d = -d;
++  // Maximum number of digits in total
++  const unsigned maxdigits=14;
++
++  const unsigned bufsize=511;
++  char buf[bufsize+1];
++
++  // The number of digits left of '.'
++  int intpartsize = 0;
++  if( fabs(d)>=1.0 )
++  {
++    snprintf(buf, bufsize, "%.0f", fabs(d));
++    intpartsize = strlen(buf);
+   }
+-  if (d >= 1e9) {
+-    // PDF will not be able to read this, but we have to write something.
+-    // Such large numbers should only happen if something is wrong.
+-    std::sprintf(buf, "%g", d);
+-    putCString(buf);
+-  } else if (d < 1e-8) {
+-    putChar('0');
+-  } else {
+-    // Print six significant digits, but omit trailing zeros.
+-    // Probably I'll want to have adjustable precision later.
+-    int factor;
+-    if (d > 1000.0)
+-      factor = 100L;
+-    else if (d > 100.0)
+-      factor = 1000L;
+-    else if (d > 10.0)
+-      factor = 10000L;
+-    else if (d > 1.0)
+-      factor = 100000L;
+-    else if (d > 0.1)
+-      factor = 1000000L;
+-    else if (d > 0.01)
+-      factor = 10000000L;
+-    else
+-      factor = 100000000L;
+-    double dd = trunc(d);
+-    int intpart = int(dd + 0.5);
+-    // 10^9 < 2^31
+-    int v = int(factor * (d - dd) + 0.5);
+-    if (v >= factor) {
+-      ++intpart;
+-      v -= factor;
+-    }
+-    std::sprintf(buf, "%d", intpart);
+-    putCString(buf);
+-    int mask = factor / 10;
+-    if (v != 0) {
+-      putChar('.');
+-      while (v != 0) {
+-	putChar('0' + v / mask);
+-	v = (10 * v) % factor;
+-      }
++
++  // The nubmer of digits right of '.'
++  int respartsize = maxdigits-intpartsize;
++  if( respartsize < 0 )
++    respartsize = 0;
++
++  // Building the format string and get the string conversion of d
++  char fmt[256];
++  snprintf(fmt, 255, "%%%d.%df", intpartsize, respartsize);
++  snprintf(buf, bufsize, fmt, d);
++
++
++  // Truncate redundant zeros and '.' from the right
++  for(int i = strlen(buf)-1; i>=intpartsize; i--)
++  {
++    // Truncate all zeros from right-hand
++    if( buf[i] == '0' )
++    {
++      buf[i] = '\0';
++      continue;
+     }
++
++    // Remove decimal dot without decimal digits
++    if( buf[i] == '.' )
++      buf[i] = '\0';
++
++    break;
+   }
++
++
++  putCString(buf);
+   return *this;
+ }
+ 
