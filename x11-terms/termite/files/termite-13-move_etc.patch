@@ -1,0 +1,11 @@
+--- Makefile	2019-04-11 13:02:36.677023737 -0000
++++ Makefile	2019-04-11 13:08:14.009877517 -0000
+@@ -38,7 +38,7 @@
+ install: termite termite.desktop termite.terminfo
+ 	mkdir -p ${DESTDIR}${TERMINFO}
+ 	install -Dm755 termite ${DESTDIR}${PREFIX}/bin/termite
+-	install -Dm644 config ${DESTDIR}/etc/xdg/termite/config
++	install -Dm644 config ${DESTDIR}${PREFIX}/etc/xdg/termite/config
+ 	install -Dm644 termite.desktop ${DESTDIR}${PREFIX}/share/applications/termite.desktop
+ 	install -Dm644 man/termite.1 ${DESTDIR}${PREFIX}/share/man/man1/termite.1
+ 	install -Dm644 man/termite.config.5 ${DESTDIR}${PREFIX}/share/man/man5/termite.config.5
