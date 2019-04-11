@@ -73,7 +73,7 @@ src_prepare() {
 
 src_install() {
 	dodir /opt
-	cp -a usr/share/skypeforlinux "${EPREFIX}"/opt/skypeforlinux || die
+	cp -a usr/share/skypeforlinux "${EPREFIX}"/opt || die
 
 
 	into /opt
